@@ -5,7 +5,7 @@ use std::fmt::Display;
 /// A [`Span`] represent a string from the source code with it's position
 /// in the source as a byte offset. That's useful to generate good error
 /// message.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Span<'a> {
     source: &'a str,
     offset: usize,
@@ -28,7 +28,7 @@ impl<'a> From<&Span<'a>> for &'a str {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Token<'a> {
     span: Span<'a>,
     pub ty: TokenType,

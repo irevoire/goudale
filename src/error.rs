@@ -11,6 +11,8 @@ pub enum Error {
     Scanner(#[from] ScannerError),
     #[error(transparent)]
     Parser(#[from] ParserError),
+    #[error(transparent)]
+    Interpreter(#[from] InterpreterError),
     #[error("Unexpected error: {0}")]
     Unexpected(#[from] anyhow::Error),
 }
@@ -25,10 +27,10 @@ pub enum SetupError {
 
 #[derive(Error, Debug)]
 pub enum ScannerError {
-    // #[error(transparent)]
-    // Nom(#[from] nom::error::Error<Span>),
     #[error("Unexpected `EoF`")]
     UnexpectedEof,
+    #[error("Unexpected character `{0}`.")]
+    UnexpectedChar(char),
     #[error("[line {line}] Error at `{token}`: {message}.")]
     At {
         line: usize,
@@ -52,3 +54,6 @@ pub enum ParserError {
     #[error(transparent)]
     Scanner(#[from] ScannerError),
 }
+
+#[derive(Error, Debug)]
+pub enum InterpreterError {}

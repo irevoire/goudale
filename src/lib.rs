@@ -1,3 +1,5 @@
+#![feature(box_patterns)]
+
 mod error;
 pub use error::*;
 

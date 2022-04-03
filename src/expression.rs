@@ -2,7 +2,7 @@ use crate::Token;
 
 pub type Value = f64;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Expr<'a> {
     Unary {
         operator: Token<'a>,

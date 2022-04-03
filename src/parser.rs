@@ -155,3 +155,51 @@ impl<'a> Parser<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::ScannerError;
+
+    use super::*;
+
+    #[test]
+    fn test_value() -> Result<()> {
+        let expr = Parser::new("1")?.parse()?;
+        assert_eq!(expr, Expr::Literal { value: 1. });
+        let expr = Parser::new("4000.53")?.parse()?;
+        assert_eq!(expr, Expr::Literal { value: 4000.53 });
+
+        let result = Parser::new("4000.53.10")?.parse();
+        assert!(matches!(
+            result,
+            Err(ParserError::Scanner(ScannerError::UnexpectedChar('.')))
+        ));
+        // Here we get the error before even calling parse because the
+        // parser needs to call the scanner once to initialize it’s state
+        let result = Parser::new("a");
+        assert!(matches!(
+            result,
+            Err(ParserError::Scanner(ScannerError::UnexpectedChar('a')))
+        ));
+        let result = Parser::new("400a")?.parse();
+        assert!(matches!(
+            result,
+            Err(ParserError::Scanner(ScannerError::UnexpectedChar('a')))
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_unary() -> Result<()> {
+        let expr = Parser::new("-1")?.parse()?;
+        assert!(matches!(
+            expr,
+            Expr::Unary {
+                operator,
+                right: box Expr::Literal { value }
+            } if operator.ty == TokenType::Minus && value == 1.
+        ));
+        Ok(())
+    }
+}

@@ -27,18 +27,17 @@ impl<'a> Scanner<'a> {
         self.offset = self.current;
         let current = self.advance();
 
-        let token = match current {
-            Some('(') => self.make_token(TokenType::LeftParen),
-            Some(')') => self.make_token(TokenType::RightParen),
-            Some('-') => self.make_token(TokenType::Minus),
-            Some('+') => self.make_token(TokenType::Plus),
-            Some('/') => self.make_token(TokenType::Slash),
-            Some('*') => self.make_token(TokenType::Star),
-            Some(c) if c.is_digit(10) => self.number(),
-            Some(c) => unimplemented!("Unknown token {c:?}"),
-            None => self.make_token(TokenType::EoF),
-        };
-        Ok(token)
+        match current {
+            Some('(') => Ok(self.make_token(TokenType::LeftParen)),
+            Some(')') => Ok(self.make_token(TokenType::RightParen)),
+            Some('-') => Ok(self.make_token(TokenType::Minus)),
+            Some('+') => Ok(self.make_token(TokenType::Plus)),
+            Some('/') => Ok(self.make_token(TokenType::Slash)),
+            Some('*') => Ok(self.make_token(TokenType::Star)),
+            Some(c) if c.is_digit(10) => Ok(self.number()),
+            Some(c) => Err(ScannerError::UnexpectedChar(c)),
+            None => Ok(self.make_token(TokenType::EoF)),
+        }
     }
 
     fn number(&mut self) -> Token<'a> {
