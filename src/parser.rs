@@ -56,9 +56,17 @@ impl<'a> Parser<'a> {
     fn factor(&mut self) -> Result<Expr<'a>> {
         let mut expr = self.unary()?;
 
-        while self.is_followed_by([TokenType::Star, TokenType::Slash])? {
+        while self.is_followed_by([TokenType::Star, TokenType::Slash, TokenType::LeftParen])? {
             let operator = self.previous().clone();
-            let right = Box::new(self.unary()?);
+            let right;
+            if operator.ty == TokenType::LeftParen {
+                let expression = Box::new(self.expression()?);
+                self.consume(&TokenType::RightParen, ")")?;
+                right = Box::new(Expr::Grouping { expression });
+            } else {
+                right = Box::new(self.unary()?);
+            }
+
             expr = Expr::Binary {
                 left: Box::new(expr),
                 operator,

@@ -19,7 +19,7 @@ impl Expr<'_> {
                 match operator.lexeme() {
                     "+" => Ok(left + right),
                     "-" => Ok(left - right),
-                    "*" => Ok(left * right),
+                    "*" | "(" => Ok(left * right),
                     "/" => Ok(left / right),
                     _ => unreachable!(),
                 }
