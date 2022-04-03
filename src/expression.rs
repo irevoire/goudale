@@ -1,6 +1,4 @@
-use crate::Token;
-
-pub type Value = f64;
+use crate::{Token, Value};
 
 #[derive(Debug, PartialEq)]
 pub enum Expr<'a> {

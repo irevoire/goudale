@@ -92,7 +92,7 @@ impl<'a> Parser<'a> {
         let token = self.advance()?;
         match token.ty {
             TokenType::Number => Ok(Expr::Literal {
-                value: token.lexeme().parse().unwrap(),
+                value: crate::Value::new(token.lexeme().parse().unwrap()),
             }),
             TokenType::LeftParen => {
                 let expr = self.expression()?;
@@ -165,9 +165,9 @@ mod tests {
     #[test]
     fn test_value() -> Result<()> {
         let expr = Parser::new("1")?.parse()?;
-        assert_eq!(expr, Expr::Literal { value: 1. });
+        assert!(matches!(expr, Expr::Literal { value } if value == 1.0));
         let expr = Parser::new("4000.53")?.parse()?;
-        assert_eq!(expr, Expr::Literal { value: 4000.53 });
+        assert!(matches!(expr, Expr::Literal { value } if value == 4000.53 ));
 
         let result = Parser::new("4000.53.10")?.parse();
         assert!(matches!(

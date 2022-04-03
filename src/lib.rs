@@ -20,3 +20,6 @@ pub use printer::*;
 
 mod interpreter;
 pub use interpreter::*;
+
+mod value;
+pub use value::*;

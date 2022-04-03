@@ -27,7 +27,7 @@ impl Expr<'_> {
                 }
             }
             Expr::Grouping { expression } => expression.interpret(),
-            Expr::Literal { value } => Ok(*value),
+            Expr::Literal { value } => Ok(value.clone()),
         }
     }
 }
