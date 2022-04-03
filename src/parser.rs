@@ -21,7 +21,16 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse(mut self) -> Result<Expr<'a>> {
-        self.expression()
+        let expr = self.expression()?;
+
+        if self.is_at_end() {
+            Ok(expr)
+        } else {
+            Err(ParserError::Tmp(format!(
+                "Unexpected caracters `{:10?}` at the end of file.",
+                self.scanner.rest(),
+            )))
+        }
     }
 
     fn expression(&mut self) -> Result<Expr<'a>> {
@@ -77,19 +86,27 @@ impl<'a> Parser<'a> {
             TokenType::Number => Ok(Expr::Literal {
                 value: token.lexeme().parse().unwrap(),
             }),
+            TokenType::LeftParen => {
+                let expr = self.expression()?;
+                self.consume(&TokenType::RightParen, ")")?;
+                Ok(Expr::Grouping {
+                    expression: Box::new(expr),
+                })
+            }
             ty => Err(ParserError::Tmp(format!(
-                "Was expecting number but instead got {:?}",
-                ty
+                "Was expecting number but instead got {ty:?}",
             ))),
         }
     }
 
     fn advance(&mut self) -> Result<&Token<'a>> {
-        if !self.is_at_end() {
+        if self.is_at_end() {
+            Ok(self.peek())
+        } else {
             self.previous = self.current.clone();
             self.current = self.scanner.scan_token()?;
+            Ok(self.previous())
         }
-        Ok(self.previous())
     }
 
     fn is_at_end(&self) -> bool {
@@ -116,5 +133,17 @@ impl<'a> Parser<'a> {
             }
         }
         Ok(false)
+    }
+
+    fn consume(&mut self, ty: &TokenType, expecting: impl AsRef<str>) -> Result<&Token<'a>> {
+        if self.check(ty) {
+            self.advance()
+        } else {
+            Err(ParserError::Consume(format!(
+                "Got `{}`. Was expecting `{}`",
+                self.peek().lexeme(),
+                expecting.as_ref()
+            )))
+        }
     }
 }

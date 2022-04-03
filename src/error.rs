@@ -47,6 +47,8 @@ pub enum ParserError {
     },
     #[error("{0}")]
     Tmp(String),
+    #[error("{0}")]
+    Consume(String),
     #[error(transparent)]
     Scanner(#[from] ScannerError),
 }

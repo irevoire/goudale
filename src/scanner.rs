@@ -18,6 +18,10 @@ impl<'a> Scanner<'a> {
         }
     }
 
+    pub fn rest(self) -> &'a str {
+        &self.source[self.offset..]
+    }
+
     pub fn scan_token(&mut self) -> Result<Token<'a>> {
         self.skip_whitespace();
         self.offset = self.current;
@@ -31,7 +35,7 @@ impl<'a> Scanner<'a> {
             Some('/') => self.make_token(TokenType::Slash),
             Some('*') => self.make_token(TokenType::Star),
             Some(c) if c.is_digit(10) => self.number(),
-            Some(c) => unimplemented!("Unknown token {c}"),
+            Some(c) => unimplemented!("Unknown token {c:?}"),
             None => self.make_token(TokenType::EoF),
         };
         Ok(token)
