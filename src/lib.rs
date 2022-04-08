@@ -23,3 +23,6 @@ pub use interpreter::*;
 
 mod value;
 pub use value::*;
+
+mod ty;
+pub use ty::*;

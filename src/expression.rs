@@ -15,6 +15,6 @@ pub enum Expr<'a> {
         expression: Box<Expr<'a>>,
     },
     Literal {
-        value: Value,
+        value: Value<'a>,
     },
 }

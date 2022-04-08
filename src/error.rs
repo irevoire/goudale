@@ -31,6 +31,8 @@ pub enum ScannerError {
     UnexpectedEof,
     #[error("Unexpected character `{0}`.")]
     UnexpectedChar(char),
+    #[error("Unknown type `{0}`.")]
+    UnknownType(String),
     #[error("[line {line}] Error at `{token}`: {message}.")]
     At {
         line: usize,

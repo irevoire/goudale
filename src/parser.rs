@@ -1,4 +1,4 @@
-use crate::{Expr, ParserError, Scanner, Token, TokenType};
+use crate::{Expr, ParserError, Scanner, Token, TokenType, Ty};
 
 type Result<T> = std::result::Result<T, ParserError>;
 
@@ -91,9 +91,7 @@ impl<'a> Parser<'a> {
     fn primary(&mut self) -> Result<Expr<'a>> {
         let token = self.advance()?;
         match token.ty {
-            TokenType::Number => Ok(Expr::Literal {
-                value: crate::Value::new(token.lexeme().parse().unwrap()),
-            }),
+            TokenType::Number => self.value(),
             TokenType::LeftParen => {
                 let expr = self.expression()?;
                 self.consume(&TokenType::RightParen, ")")?;
@@ -105,6 +103,28 @@ impl<'a> Parser<'a> {
                 "Was expecting number but instead got {ty:?}",
             ))),
         }
+    }
+
+    fn value(&mut self) -> Result<Expr<'a>> {
+        let value = self.previous().lexeme().parse().unwrap();
+
+        let ty = if self.peek().ty == TokenType::Type {
+            Some(self.ty()?)
+        } else {
+            None
+        };
+
+        Ok(Expr::Literal {
+            value: crate::Value::new(value, ty),
+        })
+    }
+
+    fn ty(&mut self) -> Result<Ty<'a>> {
+        // TODO: we need to somehow call a binary-op with only
+        // the * and / symbol and type instead of value
+        // for now we can stop the type parser once we encounter
+        // a number.
+        todo!()
     }
 
     fn advance(&mut self) -> Result<&Token<'a>> {
@@ -176,11 +196,8 @@ mod tests {
         ));
         // Here we get the error before even calling parse because the
         // parser needs to call the scanner once to initialize it’s state
-        let result = Parser::new("a");
-        assert!(matches!(
-            result,
-            Err(ParserError::Scanner(ScannerError::UnexpectedChar('a')))
-        ));
+        let result = Parser::new("a")?.parse();
+        assert!(matches!(result, Err(ParserError::Tmp(_))));
         let result = Parser::new("400a")?.parse();
         assert!(matches!(
             result,

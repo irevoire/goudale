@@ -35,6 +35,7 @@ impl<'a> Scanner<'a> {
             Some('/') => Ok(self.make_token(TokenType::Slash)),
             Some('*') => Ok(self.make_token(TokenType::Star)),
             Some(c) if c.is_digit(10) => Ok(self.number()),
+            Some(c) if c.is_alphabetic() || c == '_' => Ok(self.ty()),
             Some(c) => Err(ScannerError::UnexpectedChar(c)),
             None => Ok(self.make_token(TokenType::EoF)),
         }
@@ -53,6 +54,14 @@ impl<'a> Scanner<'a> {
         }
 
         self.make_token(TokenType::Number)
+    }
+
+    fn ty(&mut self) -> Token<'a> {
+        while self.peek().map(|c| c.is_alphabetic()).unwrap_or(false) {
+            self.advance();
+        }
+
+        self.make_token(TokenType::Type)
     }
 
     fn skip_whitespace(&mut self) {

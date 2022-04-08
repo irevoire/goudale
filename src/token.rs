@@ -62,6 +62,7 @@ pub enum TokenType {
 
     // Literals
     Number,
+    Type,
 
     // Meta
     EoF,

@@ -38,40 +38,42 @@ mod tests {
 
     #[test]
     fn test_value() -> Result<(), Error> {
-        let res = Parser::new("1")?.parse()?.interpret()?;
+        let parser = Parser::new("1")?.parse()?;
+        let res = parser.interpret()?;
         assert_eq!(res, 1.);
-        let res = Parser::new("4000.53")?.parse()?.interpret()?;
+        let parser = Parser::new("4000.53")?.parse()?;
+        let res = parser.interpret()?;
         assert_eq!(res, 4000.53);
         Ok(())
     }
 
     #[test]
     fn test_unary() -> Result<(), Error> {
-        let res = Parser::new("-1")?.parse()?.interpret()?;
+        let parser = Parser::new("-1")?.parse()?;
+        let res = parser.interpret()?;
         assert_eq!(res, -1.);
         Ok(())
     }
 
     #[test]
     fn test_binary() -> Result<(), Error> {
-        let res = Parser::new("1 + 1")?.parse()?.interpret()?;
-        assert_eq!(res, 2.);
-        let res = Parser::new("5 - 1")?.parse()?.interpret()?;
-        assert_eq!(res, 4.);
-        let res = Parser::new("2 * 3")?.parse()?.interpret()?;
-        assert_eq!(res, 6.);
-        let res = Parser::new("6 / 3")?.parse()?.interpret()?;
-        assert_eq!(res, 2.);
-        let res = Parser::new("1 / 2")?.parse()?.interpret()?;
-        assert_eq!(res, 0.5);
-        let res = Parser::new("2 + 3 * 2")?.parse()?.interpret()?;
-        assert_eq!(res, 8.);
-        let res = Parser::new("2 + (3 * 2)")?.parse()?.interpret()?;
-        assert_eq!(res, 8.);
-        let res = Parser::new("2 * (3 + 2)")?.parse()?.interpret()?;
-        assert_eq!(res, 10.);
-        let res = Parser::new("2 (3 + 2)")?.parse()?.interpret()?;
-        assert_eq!(res, 10.);
+        let test_values = [
+            ("1 + 1", 2.),
+            ("5 - 1", 4.),
+            ("2 * 3", 6.),
+            ("6 / 3", 2.),
+            ("1 / 2", 0.5),
+            ("2 + 3 * 2", 8.),
+            ("2 + (3 * 2)", 8.),
+            ("2 * (3 + 2)", 10.),
+            ("2 (3 + 2)", 10.),
+        ];
+
+        for (input, output) in test_values {
+            let parser = Parser::new(input)?.parse()?;
+            let res = parser.interpret()?;
+            assert_eq!(res, output);
+        }
         Ok(())
     }
 }
