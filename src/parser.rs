@@ -44,7 +44,7 @@ impl<'a> Parser<'a> {
         let mut expr = self.factor()?;
 
         while self.is_followed_by([TokenType::Minus, TokenType::Plus])? {
-            let operator = self.previous().clone();
+            let operator = self.previous.clone();
             let right = Box::new(self.factor()?);
             expr = Expr::Binary {
                 left: Box::new(expr),
@@ -60,7 +60,7 @@ impl<'a> Parser<'a> {
         let mut expr = self.unary()?;
 
         while self.is_followed_by([TokenType::Star, TokenType::Slash, TokenType::LeftParen])? {
-            let operator = self.previous().clone();
+            let operator = self.previous.clone();
             let right;
             if operator.ty == TokenType::LeftParen {
                 let expression = Box::new(self.expression()?);
@@ -82,7 +82,7 @@ impl<'a> Parser<'a> {
 
     fn unary(&mut self) -> Result<Expr<'a>> {
         if self.is_followed_by([TokenType::Minus])? {
-            let operator = self.previous().clone();
+            let operator = self.previous.clone();
             let right = Box::new(self.unary()?);
 
             Ok(Expr::Unary { operator, right })
@@ -109,9 +109,9 @@ impl<'a> Parser<'a> {
     }
 
     fn value(&mut self) -> Result<Expr<'a>> {
-        let value = self.previous().lexeme().parse().unwrap();
+        let value = self.previous.lexeme().parse().unwrap();
 
-        let ty = if self.peek().ty == TokenType::Type {
+        let ty = if self.current.ty == TokenType::Type {
             Some(self.ty()?)
         } else {
             None
@@ -132,28 +132,20 @@ impl<'a> Parser<'a> {
 
     fn advance(&mut self) -> Result<&Token<'a>> {
         if self.is_at_end() {
-            Ok(self.peek())
+            Ok(&self.current)
         } else {
             self.previous = self.current.clone();
             self.current = Token::new_from_lexer(&mut self.lexer);
-            Ok(self.previous())
+            Ok(&self.previous)
         }
     }
 
     fn is_at_end(&self) -> bool {
-        self.peek().ty == TokenType::EoF
-    }
-
-    fn peek(&self) -> &Token<'a> {
-        &self.current
-    }
-
-    fn previous(&self) -> &Token<'a> {
-        &self.previous
+        self.current.ty == TokenType::EoF
     }
 
     fn check(&mut self, ty: &TokenType) -> bool {
-        (!self.is_at_end()) && (&self.peek().ty == ty)
+        &self.current.ty == ty
     }
 
     fn is_followed_by(&mut self, types: impl IntoIterator<Item = TokenType>) -> Result<bool> {
@@ -172,7 +164,7 @@ impl<'a> Parser<'a> {
         } else {
             Err(ParserError::Consume(format!(
                 "Got `{}`. Was expecting `{}`",
-                self.peek().lexeme(),
+                self.current.lexeme(),
                 expecting.as_ref()
             )))
         }
