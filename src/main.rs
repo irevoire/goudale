@@ -48,7 +48,7 @@ fn run_prompt() -> Result<()> {
 }
 
 fn run(source: &str) -> Result<()> {
-    let parser = Parser::new(source)?;
+    let parser = Parser::new(source);
     let expr = parser.parse()?;
     let result = expr.interpret().unwrap();
     println!("{}", result);

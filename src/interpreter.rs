@@ -38,10 +38,10 @@ mod tests {
 
     #[test]
     fn test_value() -> Result<(), Error> {
-        let parser = Parser::new("1")?.parse()?;
+        let parser = Parser::new("1").parse()?;
         let res = parser.interpret()?;
         assert_eq!(res, 1.);
-        let parser = Parser::new("4000.53")?.parse()?;
+        let parser = Parser::new("4000.53").parse()?;
         let res = parser.interpret()?;
         assert_eq!(res, 4000.53);
         Ok(())
@@ -49,7 +49,7 @@ mod tests {
 
     #[test]
     fn test_unary() -> Result<(), Error> {
-        let parser = Parser::new("-1")?.parse()?;
+        let parser = Parser::new("-1").parse()?;
         let res = parser.interpret()?;
         assert_eq!(res, -1.);
         Ok(())
@@ -70,7 +70,8 @@ mod tests {
         ];
 
         for (input, output) in test_values {
-            let parser = Parser::new(input)?.parse()?;
+            println!("parsing {input}");
+            let parser = Parser::new(input).parse()?;
             let res = parser.interpret()?;
             assert_eq!(res, output);
         }
