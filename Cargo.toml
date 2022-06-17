@@ -12,6 +12,7 @@ keywords = ["calculator", "type"]
 [dependencies]
 nom = "7.1.1"
 nom_locate = "4.0.0"
+logos = "0.12.1"
 thiserror = "1.0.30"
 anyhow = "1.0.56"
 atty = "0.2.14"

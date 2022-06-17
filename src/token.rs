@@ -1,69 +1,60 @@
 //! This module is dedicated to the definition and parsing of the [`Token`]s
-
-use std::fmt::Display;
-
-/// A [`Span`] represent a string from the source code with it's position
-/// in the source as a byte offset. That's useful to generate good error
-/// message.
-#[derive(Debug, Clone, PartialEq)]
-pub struct Span<'a> {
-    source: &'a str,
-    offset: usize,
-    size: usize,
-}
-
-impl<'a> Span<'a> {
-    pub fn new(source: &'a str, offset: usize, size: usize) -> Self {
-        Self {
-            source,
-            offset,
-            size,
-        }
-    }
-}
-
-impl<'a> From<&Span<'a>> for &'a str {
-    fn from(span: &Span<'a>) -> Self {
-        &span.source[span.offset..span.offset + span.size]
-    }
-}
+use logos::{Lexer, Logos};
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Token<'a> {
-    span: Span<'a>,
+pub struct Token<'source> {
+    source: &'source str,
+    span: logos::Span,
     pub ty: TokenType,
 }
 
-impl<'a> Token<'a> {
-    pub fn new(span: Span<'a>, ty: TokenType) -> Self {
-        Self { span, ty }
+impl<'source> Token<'source> {
+    pub fn new_from_lexer(lexer: &mut Lexer<'source, TokenType>) -> Self {
+        let source = lexer.source();
+        if let Some(token_type) = lexer.next() {
+            Self {
+                source,
+                span: lexer.span(),
+                ty: token_type,
+            }
+        } else {
+            Self {
+                source,
+                span: source.len()..source.len(),
+                ty: TokenType::EoF,
+            }
+        }
     }
-
     pub fn lexeme(&self) -> &str {
-        (&self.span).into()
+        &self.source[self.span.clone()]
     }
 }
 
-impl Display for Token<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.lexeme())
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Logos, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TokenType {
     // single character token
+    #[token("(")]
     LeftParen,
+    #[token(")")]
     RightParen,
+    #[token("-")]
     Minus,
+    #[token("+")]
     Plus,
+    #[token("/")]
     Slash,
+    #[token("*")]
     Star,
 
     // Literals
+    #[regex(r#"[0-9]+(\.[0-9]*)?"#)]
     Number,
+    #[regex("[_a-zA-Z]+")]
     Type,
 
-    // Meta
+    #[regex(r"[ \r\t\n]+", logos::skip)]
+    #[error]
+    Error,
+
     EoF,
 }

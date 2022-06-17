@@ -6,9 +6,6 @@ pub use error::*;
 mod token;
 pub use token::*;
 
-mod scanner;
-pub use scanner::*;
-
 mod parser;
 pub use parser::*;
 
