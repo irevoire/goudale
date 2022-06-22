@@ -13,6 +13,7 @@ keywords = ["calculator", "type"]
 nom = "7.1.1"
 nom_locate = "4.0.0"
 logos = "0.12.1"
-thiserror = "1.0.30"
+thiserror = "1.0.31"
 anyhow = "1.0.56"
 atty = "0.2.14"
+miette = { version = "4.7.1", features = ["fancy"] }

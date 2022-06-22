@@ -1,3 +1,4 @@
+use miette::IntoDiagnostic;
 use std::{
     io::{BufRead, Write},
     path::Path,
@@ -35,10 +36,11 @@ fn run_prompt() -> Result<()> {
     stdout.flush().map_err(SetupError::from)?;
 
     for line in stdin.lines() {
-        let line = line.map_err(SetupError::from);
-        match run(&line?) {
+        let line = line.map_err(SetupError::from)?;
+        match run(&line) {
             Ok(_) => (),
-            Err(error) => println!("{}", error),
+            Err(Error::Parser(error)) => println!("{:?}", miette::Report::from(error)),
+            Err(error) => println!("{:?}", error),
         }
         print!("> ");
         stdout.flush().map_err(SetupError::from)?;

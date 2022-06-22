@@ -29,10 +29,14 @@ impl<'a> Parser<'a> {
         if self.is_at_end() {
             Ok(expr)
         } else {
-            Err(ParserError::Tmp(format!(
-                "Unexpected caracters `{:10?}` at the end of file.",
-                self.lexer.remainder(),
-            )))
+            Err(ParserError {
+                src: self.lexer.source().to_string(),
+                message: format!(
+                    "Unexpected characters `{:.10}` at the end of file.",
+                    self.current.lexeme().to_string() + self.lexer.remainder(),
+                ),
+                span: self.current.span.into(),
+            })
         }
     }
 
@@ -102,9 +106,11 @@ impl<'a> Parser<'a> {
                     expression: Box::new(expr),
                 })
             }
-            ty => Err(ParserError::Tmp(format!(
-                "Was expecting number but instead got {ty:?}",
-            ))),
+            ty => Err(ParserError {
+                src: self.lexer.source().to_string(),
+                message: format!("Was expecting a number but instead got {ty:?}",),
+                span: self.current.span.clone().into(),
+            }),
         }
     }
 
@@ -162,23 +168,23 @@ impl<'a> Parser<'a> {
         if self.check(ty) {
             self.advance()
         } else {
-            Err(ParserError::Consume(format!(
-                "Got `{}`. Was expecting `{}`",
-                self.current.lexeme(),
-                expecting.as_ref()
-            )))
+            Err(ParserError {
+                src: self.lexer.source().to_string(),
+                message: format!(
+                    "Was expecting `{}` but instead got {ty:?}",
+                    expecting.as_ref()
+                ),
+                span: self.current.span.clone().into(),
+            })
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::ScannerError;
-
     use super::*;
 
     #[test]
-    #[ignore]
     fn test_value() -> Result<()> {
         let expr = Parser::new("1").parse()?;
         assert!(matches!(expr, Expr::Literal { value } if value == 1.0));
@@ -186,19 +192,27 @@ mod tests {
         assert!(matches!(expr, Expr::Literal { value } if value == 4000.53 ));
 
         let result = Parser::new("4000.53.10").parse();
+        dbg!(result);
+        assert!(false);
+        /*
         assert!(matches!(
             result,
-            Err(ParserError::Scanner(ScannerError::UnexpectedChar('.')))
+            Ok(3) // Err(ParserError::Scanner(ScannerError::UnexpectedChar('.')))
         ));
+        */
         // Here we get the error before even calling parse because the
         // parser needs to call the scanner once to initialize it’s state
         let result = Parser::new("a").parse();
-        assert!(matches!(result, Err(ParserError::Tmp(_))));
+        assert!(matches!(result, Err(ParserError { .. })));
         let result = Parser::new("400a").parse();
+        dbg!(result);
+        assert!(false);
+        /*
         assert!(matches!(
             result,
             Err(ParserError::Scanner(ScannerError::UnexpectedChar('a')))
         ));
+        */
 
         Ok(())
     }

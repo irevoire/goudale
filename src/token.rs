@@ -4,7 +4,7 @@ use logos::{Lexer, Logos};
 #[derive(Debug, Clone, PartialEq)]
 pub struct Token<'source> {
     source: &'source str,
-    span: logos::Span,
+    pub span: logos::Span,
     pub ty: TokenType,
 }
 
